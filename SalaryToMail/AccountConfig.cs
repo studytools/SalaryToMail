@@ -15,8 +15,11 @@ using System.Net;
 
 namespace SalaryToMail
 {
+  public delegate void SendEmailNow();
   public partial class AccountConfig : Form
   {
+    public event SendEmailNow SendEmailNowHeahEvent;
+
     public AccountConfig()
     {
       InitializeComponent();
@@ -120,5 +123,9 @@ namespace SalaryToMail
       System.Configuration.ConfigurationManager.RefreshSection("appSettings");
     }
 
+    private void buttonSend_Click(object sender, EventArgs e)
+    {
+      if (SendEmailNowHeahEvent != null) SendEmailNowHeahEvent();
+    }
   }//public partial class AccountConfig : Form
 }//namespace WindowsFormsApp1

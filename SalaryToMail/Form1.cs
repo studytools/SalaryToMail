@@ -28,6 +28,11 @@ namespace SalaryToMail
 
     }
 
+    public void SendDataToMail()
+    {
+      SendSMTP.SendEmail(readExcelFile.bookName, ref packageHtml);
+    }
+
     private void buttonOpen_Click(object sender, EventArgs e)
     {
       System.Windows.Forms.OpenFileDialog openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
@@ -62,11 +67,12 @@ namespace SalaryToMail
     {
       if (bool.Parse(ConfigurationManager.AppSettings["savepasswordchecked"]))
       {
-        SendSMTP.SendEmail(readExcelFile.bookName,ref packageHtml);
+        SendDataToMail();
       }
       else
       {
         AccountConfig account_config = new AccountConfig();
+        account_config.SendEmailNowHeahEvent += new SendEmailNow(SendDataToMail);
         account_config.ShowDialog();
       }
 
