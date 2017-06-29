@@ -16,23 +16,25 @@ using System.Net;
 namespace SalaryToMail
 {
   public delegate void SendEmailNow();
+
   public partial class AccountConfig : Form
   {
+    AccountData accountData;
     public event SendEmailNow SendEmailNowHeahEvent;
 
-    public AccountConfig()
+    public AccountConfig(ref AccountData ac)
     {
       InitializeComponent();
 
+      accountData = ac;
 
-      textBoxsmpt.Text = ConfigurationManager.AppSettings["smtp"];
-      textBoxPort.Text = ConfigurationManager.AppSettings["port"];
-      textBoxAccount.Text = ConfigurationManager.AppSettings["username"];
+      textBoxsmpt.Text = accountData.StrSMTP;
+      textBoxPort.Text = accountData.IPort.ToString();
+      textBoxAccount.Text = accountData.StrUserName;
 
-      if (bool.Parse(ConfigurationManager.AppSettings["savepasswordchecked"]))
+      if (accountData.IsSavePassword)
       {
-        Encryption dec = new Encryption();
-        textBoxPassword.Text = dec.Decode(ConfigurationManager.AppSettings["password"]);
+        textBoxPassword.Text = accountData.StrPassword;
         checkBoxSavePassword.Checked = true;
       }
       else
@@ -43,14 +45,9 @@ namespace SalaryToMail
 
     }
 
-    private bool PasswordIsEmpty()
-    {
-      return string.IsNullOrEmpty(textBoxPassword.Text);
-    }
-
     private void buttonTestConnect_Click(object sender, EventArgs e)
     {
-        if (PasswordIsEmpty())
+        if (string.IsNullOrEmpty(textBoxPassword.Text))
         {
           MessageBox.Show("密码不能为空!");
           return;
@@ -96,31 +93,19 @@ namespace SalaryToMail
 
     private void buttonSaveAccountConfig_Click(object sender, EventArgs e)
     {
-      if (checkBoxSavePassword.Checked && PasswordIsEmpty())
+      if (checkBoxSavePassword.Checked && string.IsNullOrEmpty(textBoxPassword.Text))
       {
         MessageBox.Show("密码不能为空!");
         return;
       }
 
-      Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-      if (checkBoxSavePassword.Checked)
-      {
-        Encryption dec = new Encryption();
-        config.AppSettings.Settings["password"].Value = dec.Encode(textBoxPassword.Text);
-        config.AppSettings.Settings["savepasswordchecked"].Value = "true";
-      }
-      else
-      {
-        config.AppSettings.Settings["password"].Value = "";
-        config.AppSettings.Settings["savepasswordchecked"].Value = "false";
-      }
+      accountData.StrSMTP = textBoxsmpt.Text;
+      accountData.IPort = int.Parse(textBoxPort.Text);
+      accountData.StrUserName = textBoxAccount.Text;
+      accountData.StrPassword = textBoxPassword.Text;
+      accountData.IsSavePassword = checkBoxSavePassword.Checked;
 
-      config.AppSettings.Settings["smtp"].Value = textBoxsmpt.Text;
-      config.AppSettings.Settings["port"].Value = textBoxPort.Text;
-      config.AppSettings.Settings["username"].Value = textBoxAccount.Text;
-
-      config.Save(ConfigurationSaveMode.Modified);
-      System.Configuration.ConfigurationManager.RefreshSection("appSettings");
+      accountData.WriteAccountData();
     }
 
     private void buttonSend_Click(object sender, EventArgs e)

@@ -21,9 +21,9 @@ namespace SalaryToMail
 
     private string mailHeader { get; set; }
 
-    public void SetMailHeader(ref List<PackageHtml.Employee> lstr)
+    public void SetMailHeader(string strFooters,ref List<PackageHtml.Employee> lstr)
     {
-      string footersstr = System.Text.RegularExpressions.Regex.Replace(ConfigurationManager.AppSettings["footers"], "[\r\n]", "<br>");
+      string footersstr = System.Text.RegularExpressions.Regex.Replace(strFooters, "[\r\n]", "<br>");
 
       string prestr = "";
       foreach (PackageHtml.Employee str in lstr)

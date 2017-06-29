@@ -16,6 +16,7 @@ namespace SalaryToMail
   {
     ReadExcelFile readExcelFile;
     PackageHtml packageHtml;
+    AccountData accountData;
 
     public Form1()
     {
@@ -23,6 +24,7 @@ namespace SalaryToMail
 
       readExcelFile = new ReadExcelFile();
       packageHtml = new PackageHtml();
+      accountData = new AccountData();
 
       textBoxFooters.Text = ConfigurationManager.AppSettings["footers"];
 
@@ -30,7 +32,7 @@ namespace SalaryToMail
 
     public void SendDataToMail()
     {
-      SendSMTP.SendEmail(readExcelFile.bookName, ref packageHtml);
+      SendSMTP.SendEmail(readExcelFile.bookName, textBoxFooters.Text, ref packageHtml,ref accountData);
     }
 
     private void buttonOpen_Click(object sender, EventArgs e)
@@ -65,38 +67,32 @@ namespace SalaryToMail
 
     private void buttonSendEmail_Click(object sender, EventArgs e)
     {
-      if (bool.Parse(ConfigurationManager.AppSettings["savepasswordchecked"]))
+      if (string.IsNullOrEmpty(accountData.StrPassword))
       {
-        SendDataToMail();
+        AccountConfig account_config = new AccountConfig(ref accountData);
+        account_config.SendEmailNowHeahEvent += new SendEmailNow(SendDataToMail);
+        account_config.ShowDialog();
       }
       else
       {
-        AccountConfig account_config = new AccountConfig();
-        account_config.SendEmailNowHeahEvent += new SendEmailNow(SendDataToMail);
-        account_config.ShowDialog();
+        SendDataToMail();
       }
 
     }
 
     private void buttonSetAccountConfig_Click(object sender, EventArgs e)
     {
-      AccountConfig account_config = new AccountConfig();
+      AccountConfig account_config = new AccountConfig(ref accountData);
+      account_config.SendEmailNowHeahEvent += new SendEmailNow(SendDataToMail);
       account_config.ShowDialog();
     }
 
     private void buttonSendPreview_Click(object sender, EventArgs e)
     {
       WebPreView wpv = new WebPreView();
-      wpv.SetMailHeader(ref packageHtml.employeeData);
+      wpv.SetMailHeader(textBoxFooters.Text, ref packageHtml.employeeData);
       wpv.ShowDialog();
     }
 
-    private void textBoxFooters_TextChanged(object sender, EventArgs e)
-    {
-      Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-      config.AppSettings.Settings["footers"].Value = textBoxFooters.Text;
-      config.Save(ConfigurationSaveMode.Modified);
-      System.Configuration.ConfigurationManager.RefreshSection("appSettings");
-    }
   }
 }

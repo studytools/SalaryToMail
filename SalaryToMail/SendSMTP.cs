@@ -11,7 +11,8 @@ namespace SalaryToMail
 {
   public class SendSMTP
   {
-    public static void SendEmail(string bookName,ref PackageHtml data)
+    public static void SendEmail(
+      string bookName, string strFooters,ref PackageHtml data, ref AccountData ac)
     {
       if(string.IsNullOrEmpty(bookName) || data.employeeData.Count == 0)
       {
@@ -20,20 +21,18 @@ namespace SalaryToMail
       }
 
       //Create Smtp Client
-      int.TryParse(ConfigurationManager.AppSettings["port"], out int port);
-      var mailer = new MimeMailer(ConfigurationManager.AppSettings["smtp"], port);
-      mailer.User = ConfigurationManager.AppSettings["username"];
-      Encryption dec = new Encryption();
-      mailer.Password = dec.Decode(ConfigurationManager.AppSettings["password"]);
+      var mailer = new MimeMailer(ac.StrSMTP, ac.IPort);
+      mailer.User = ac.StrUserName;
+      mailer.Password = ac.StrPassword;
       mailer.SslType = SslMode.Ssl;
       mailer.AuthenticationMode = AuthenticationType.Base64;
 
-      string footersstr = System.Text.RegularExpressions.Regex.Replace(ConfigurationManager.AppSettings["footers"], "[\r\n]", "<br>");
+      string footersstr = System.Text.RegularExpressions.Regex.Replace(strFooters, "[\r\n]", "<br>");
       foreach (PackageHtml.Employee str in data.employeeData)
       {
         //Generate Message
         var mailMessage = new MimeMailMessage();
-        mailMessage.From = new MimeMailAddress(ConfigurationManager.AppSettings["username"].ToString());
+        mailMessage.From = new MimeMailAddress(ac.StrUserName);
         mailMessage.To.Add(str.email);
         mailMessage.SubjectEncoding = Encoding.BigEndianUnicode;
         mailMessage.Subject = bookName;

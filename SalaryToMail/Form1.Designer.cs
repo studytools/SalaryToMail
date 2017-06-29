@@ -160,7 +160,6 @@
       this.textBoxFooters.Name = "textBoxFooters";
       this.textBoxFooters.Size = new System.Drawing.Size(253, 44);
       this.textBoxFooters.TabIndex = 8;
-      this.textBoxFooters.TextChanged += new System.EventHandler(this.textBoxFooters_TextChanged);
       // 
       // textBox1
       // 

@@ -75,6 +75,7 @@
     <Compile Include="AccountConfig.Designer.cs">
       <DependentUpon>AccountConfig.cs</DependentUpon>
     </Compile>
+    <Compile Include="AccountData.cs" />
     <Compile Include="Encryption.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
